@@ -40,8 +40,14 @@ def generate_launch_description():
         get_package_share_directory('sjtu_drone_bringup'),
         'config', 'drone.yaml'
     )   
+
+    origin = {
+        "x": "0.0",
+        "y": "0.0",
+        "z": "0.04"
+    }
     
-    robot_description_config = xacro.process_file(xacro_file, mappings={"params_path": yaml_file_path})
+    robot_description_config = xacro.process_file(xacro_file, mappings={"params_path": yaml_file_path, "x": origin["x"], "y": origin["y"], "z": origin["z"]})
     robot_desc = robot_description_config.toxml()
     # get ns from yaml
     model_ns = "drone"
@@ -53,8 +59,10 @@ def generate_launch_description():
 
     world_file = os.path.join(
         get_package_share_directory("sjtu_drone_description"),
-        "worlds", "simple_wall_following.world"
+        # "worlds", "simple_wall_following.world"
         # "worlds", "maze_3_6x6.world"
+        "worlds", "self_made_maze.world"
+
 
     )
 
