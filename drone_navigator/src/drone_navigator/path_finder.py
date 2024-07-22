@@ -41,51 +41,35 @@ class DroneNavigator():
     
     
 
+    def filter_by_range_relibility(self, depth_image, min_std = 0, max_std = 0.03):
+        # Make std image
+        std_dev, std_dev_image = self.compute_std_dev(depth_image)
 
+        # Reconstruction and Analysis 3D Scenes page 29, suggests max std at 0.03
+        min_threshold = min_std
+        max_threshold = max_std
+        _,filtered = cv2.threshold(std_dev, min_threshold, max_threshold, cv2.THRESH_BINARY_INV)
+
+        filtered_image = cv2.normalize(filtered, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+
+        return filtered, filtered_image
+    
     def depth_image_callback(self, msg):
-        # print("Received an image!")
         # Convert ROS Image message to OpenCV image
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding="32FC1")
-
-        # show image
-        # cv2.imshow("Image window", cv_image)
-        # cv2.waitKey(3)
-        
-        
-        # Process the image using OpenCV
+              
         # Make depth image more distinguishable
         cv_image = cv2.normalize(cv_image, None, 0, 255, cv2.NORM_MINMAX)
         cv_image = cv2.convertScaleAbs(cv_image)
+        cv2.imshow("Image window", cv_image)
 
-
-
-        # # Make window
-        # cv2.namedWindow("Depth Image", cv2.WINDOW_NORMAL)
-        # # Show the image
-        # cv2.imshow("Depth Image", cv_image) 
-        # cv2.resizeWindow("Depth Image", 400, 300)
-
-        # Make std image
-        std_dev, std_dev_image = self.compute_std_dev(cv_image)
-
-        cv2.namedWindow("std_dev", cv2.WINDOW_NORMAL)
-        cv2.imshow("std_dev", std_dev_image)
-        
-        # Reconstruction and Analysis 3D Scenes page 29
-        min_threshold = 0
-        max_threshold = 0.03
-        _,filtered = cv2.threshold(std_dev, min_threshold, max_threshold, cv2.THRESH_BINARY_INV)
-
-        filtered = cv2.normalize(filtered, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-
-        cv2.imshow("Filtered", filtered)
-
-
-
+        filtered, filtered_image = self.filter_by_range_relibility(cv_image)
+        cv2.imshow("Filtered", filtered_image)
 
         cv2.waitKey(3)
-    
+
+
     def display_point_cloud_as_heatmap(self, data, width, height):
         # Assuming data is a flat array, reshape it to 2D
         if len(data) != width * height:
