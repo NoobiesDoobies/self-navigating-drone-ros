@@ -1,0 +1,22 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/carlios/dev_ws/build/sjtu_drone_control",
+        "/home/carlios/dev_ws/install/sjtu_drone_control/lib/python3.10/site-packages",
+        "/home/carlios/dev_ws/build/sjtu_drone_bringup",
+        "/home/carlios/dev_ws/install/sjtu_drone_bringup/lib/python3.10/site-packages",
+        "/home/carlios/dev_ws/build/drone_navigator/src",
+        "/home/carlios/dev_ws/install/drone_navigator/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/carlios/dev_ws/build/sjtu_drone_control",
+        "/home/carlios/dev_ws/install/sjtu_drone_control/lib/python3.10/site-packages",
+        "/home/carlios/dev_ws/build/sjtu_drone_bringup",
+        "/home/carlios/dev_ws/install/sjtu_drone_bringup/lib/python3.10/site-packages",
+        "/home/carlios/dev_ws/build/drone_navigator/src",
+        "/home/carlios/dev_ws/install/drone_navigator/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
