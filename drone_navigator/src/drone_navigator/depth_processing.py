@@ -14,10 +14,16 @@ class DroneNavigator():
         self.depth_image = None
         self.point_cloud = None
 
+        self.intrinsic_matrix = {
+            "fx": 572.5741169395627,
+            "cx": 320.5,
+            "fy": 572.5741169395627,
+            "cy": 240.5
+        }
+
 
 
     def compute_std_dev(self, image, kernel_size=(3, 3)):
-        image_32f = np.float32(image)
         # Step 1: Compute mean        
         mean = cv2.blur(image, kernel_size)
         
@@ -28,7 +34,8 @@ class DroneNavigator():
         var = squared_mean - mean*mean
 
         # Step 4: Compute standard deviation
-        std_dev = np.sqrt(var)
+        # std_dev = np.sqrt(var)
+        std_dev = var
 
         std_dev = np.float32(std_dev)
         # Normalize std_dev to the range [0, 255] for display
@@ -40,20 +47,41 @@ class DroneNavigator():
         return std_dev, std_dev_image
     
     
+    def depth_to_xyz(self, depth_image, fx, fy, cx, cy):
+        height, width = depth_image.shape
+        x = np.arange(0, width)
+        y = np.arange(0, height)
+        xx, yy = np.meshgrid(x, y)
+        
+        # Convert from image coordinates to camera coordinates
+        X = (xx - cx) * depth_image / fx
+        Y = (yy - cy) * depth_image / fy
+        Z = depth_image
+        
+        # Stack to get 3D coordinates
+        xyz = np.stack((X, Y, Z), axis=-1)
+        
+        return xyz
 
-    def filter_by_range_relibility(self, depth_image, min_std = 0, max_std = 0.03):
+    def filter_by_range_relibility(self, depth_image, kernel_size=(3,3), min_std = 0, max_std = 0.03):
+        depth_image_copy = depth_image.copy()
+
         # Make std image
-        std_dev, std_dev_image = self.compute_std_dev(depth_image)
+        std_dev, std_dev_image = self.compute_std_dev(depth_image, kernel_size)
 
         # Reconstruction and Analysis 3D Scenes page 29, suggests max std at 0.03
         min_threshold = min_std
         max_threshold = max_std
-        _,filtered = cv2.threshold(std_dev, min_threshold, max_threshold, cv2.THRESH_BINARY_INV)
+        _,filter = cv2.threshold(std_dev, max_threshold, 1, cv2.THRESH_BINARY_INV)
 
-        filtered_image = cv2.normalize(filtered, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-
-        return filtered, filtered_image
+        # Filtered by range image
+        filtered_by_range = np.multiply(depth_image_copy, filter)
+        filtered_by_range_image = cv2.normalize(filtered_by_range, None, 0, 255, cv2.NORM_MINMAX)
+        
+        
+        return filtered_by_range, filtered_by_range_image
     
+
     def depth_image_callback(self, msg):
         # Convert ROS Image message to OpenCV image
         bridge = CvBridge()
@@ -61,47 +89,29 @@ class DroneNavigator():
               
         # Make depth image more distinguishable
         cv_image = cv2.normalize(cv_image, None, 0, 255, cv2.NORM_MINMAX)
+
+
+
+        filtered_by_range, filtered_by_range_image = self.filter_by_range_relibility(cv_image, kernel_size=(3, 3), min_std=0, max_std=0.03)
+        # cv2.imshow("Filter", filtered_by_range)
+        cv2.imshow("Filtered by Range", filtered_by_range_image)
+
+
+        # Display the original image last because I don't want to convert it to uint8 before calculation
         cv_image = cv2.convertScaleAbs(cv_image)
+        # create window for displaying image using
         cv2.imshow("Image window", cv_image)
 
-        filtered, filtered_image = self.filter_by_range_relibility(cv_image)
-        cv2.imshow("Filtered", filtered_image)
+        filtered_by_range_uint8 = cv2.convertScaleAbs(filtered_by_range)
+        cv2.imshow("Filtered by Range uint8", filtered_by_range_uint8)
 
         cv2.waitKey(3)
-
-
-    def display_point_cloud_as_heatmap(self, data, width, height):
-        # Assuming data is a flat array, reshape it to 2D
-        if len(data) != width * height:
-            raise ValueError("Data size does not match specified width and height")
-        
-        data_2d = np.reshape(data, (height, width))
-        
-        # Normalize the data to 0-255
-        normalized_data = cv2.normalize(data_2d, None, 0, 255, cv2.NORM_MINMAX)
-        
-        # Convert to 8-bit unsigned integer
-        normalized_data = np.uint8(normalized_data)
-        
-        # Apply a colormap for heatmap visualization
-        heatmap = cv2.applyColorMap(normalized_data, cv2.COLORMAP_JET)
-        
-        # Display the heatmap
-        cv2.imshow("Point Cloud Heatmap", heatmap)
-        cv2.waitKey(10)  # Use a small delay so the window can update properly
 
     def point_cloud_callback(self, msg):
         self.point_cloud = msg.data
         width = msg.width
         height = msg.height
         row_step = msg.row_step
-            
-        # print(np.array(self.point_cloud).shape)
-        # print(width, height)
-        # print(width * height)
-        # display point cloud into heatmap
-
-        # cv2.imshow("point cloud", )
 
     def main(self):
         rclpy.init()

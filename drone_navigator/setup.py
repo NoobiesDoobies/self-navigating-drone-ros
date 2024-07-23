@@ -20,7 +20,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'path_finder = drone_navigator.path_finder:main',
+            'depth_processing = drone_navigator.depth_processing:main',
         ],
     },
 )
