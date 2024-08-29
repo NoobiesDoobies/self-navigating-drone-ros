@@ -61,7 +61,8 @@ def generate_launch_description():
         get_package_share_directory("sjtu_drone_description"),
         # "worlds", "simple_wall_following.world"
         # "worlds", "maze_3_6x6.world"
-        "worlds", "self_made_maze.world"
+        # "worlds", "self_made_maze.world"
+        "worlds", "simple_office.world"
 
 
     )
