@@ -4,6 +4,7 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="sjtu_drone">
+  <xacro name="pi" value="3.14159265359"/>
   <link name="base_footprint"/>
   <joint name="base_footprint_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -19,14 +20,14 @@
     <collision name="sjtu_drone_collision">
       <origin rpy="0 0 0" xyz="0 0 0.04"/>
       <geometry>
-        <mesh filename="file:///home/carlios/ros2_ws/install/sjtu_drone_description/share/sjtu_drone_description/models/sjtu_drone/quadrotor_4.stl"/>
+        <mesh filename="file:///home/carlios/dev_ws/install/sjtu_drone_description/share/sjtu_drone_description/models/sjtu_drone/quadrotor_4.stl"/>
         <!-- <mesh filename="package://sjtu_drone/quadrotor_4.stl"/> -->
       </geometry>
     </collision>
     <visual name="sjtu_drone_visual">
       <origin rpy="0 0 0" xyz="0 0 0.04"/>
       <geometry>
-        <mesh filename="file:///home/carlios/ros2_ws/install/sjtu_drone_description/share/sjtu_drone_description/models/sjtu_drone/quadrotor_4.dae"/>
+        <mesh filename="file:///home/carlios/dev_ws/install/sjtu_drone_description/share/sjtu_drone_description/models/sjtu_drone/quadrotor_4.dae"/>
         <!-- <mesh filename="package://sjtu_drone/quadrotor_4.dae"/> -->
       </geometry>
     </visual>
@@ -43,6 +44,16 @@
     <child link="front_cam_link"/>
   </joint>
   <link name="front_cam_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+          image won't be aligned properly with the frame it is supposedly
+          originating from -->
+    <origin rpy="-1.5707963267948966 0 -1.5707963267948966" xyz="0 0 0"/>
+    <parent link="front_cam_link"/>
+    <child link="camera_link_optical"/>
+  </joint>
+  <link name="camera_link_optical">
+  </link>
   <!-- <joint name="bottom_cam_joint" type="fixed">
     <origin rpy="0 ${M_PI/2} 0" xyz="0 0 0"/>
     <parent link="base_link" />
@@ -186,11 +197,11 @@
         <ros>
           <namespace>/simple_drone</namespace>
         </ros>
-        <frame_name>/simple_drone/front_cam_link</frame_name>
+        <frame_name>simple_drone/front_cam_link</frame_name>
         <camera_name>front</camera_name>
         <hack_baseline>0.07</hack_baseline>
-        <!-- <min_depth>0.2</min_depth>
-        <max_depth>8.0</max_depth> -->
+        <min_depth>0.05</min_depth>
+        <max_depth>20.0</max_depth>
       </plugin>
     </sensor>
   </gazebo>

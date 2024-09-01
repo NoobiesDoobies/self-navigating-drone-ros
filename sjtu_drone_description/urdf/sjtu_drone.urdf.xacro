@@ -6,6 +6,8 @@
   <xacro:arg name="x" default="0"/>
   <xacro:arg name="y" default="0"/>
   <xacro:arg name="z" default="0.04"/>
+  <xacro name="pi" value="3.14159265359" />
+
   <!-- Need seperate property for xacro inorder processing -->
   <xacro:property name="params_path" value="$(arg params_path)"/> 
 
@@ -58,7 +60,18 @@
     <child link="front_cam_link" />
   </joint>
   <link name="front_cam_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+          image won't be aligned properly with the frame it is supposedly
+          originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    <parent link="front_cam_link" />
+    <child link="camera_link_optical" />
+  </joint>
 
+
+  <link name="camera_link_optical">
+  </link>
   <!-- <joint name="bottom_cam_joint" type="fixed">
     <origin rpy="0 ${M_PI/2} 0" xyz="0 0 0"/>
     <parent link="base_link" />
@@ -209,7 +222,7 @@
         <ros>
           <namespace>${mp['namespace']}</namespace>
         </ros>
-        <frame_name>${mp['namespace']}/front_cam_link</frame_name>
+        <frame_name>simple_drone/camera_link_optical</frame_name>
         <camera_name>front</camera_name>
         <hack_baseline>0.07</hack_baseline>
         <min_depth>0.05</min_depth>

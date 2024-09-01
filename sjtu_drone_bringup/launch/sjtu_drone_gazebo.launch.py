@@ -62,7 +62,9 @@ def generate_launch_description():
         # "worlds", "simple_wall_following.world"
         # "worlds", "maze_3_6x6.world"
         # "worlds", "self_made_maze.world"
-        "worlds", "simple_office.world"
+        # "worlds", "simple_office.world"
+        # "worlds", "furnished_office2.world",
+        "worlds", "cave.world"
 
 
     )
@@ -73,7 +75,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(
                     os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')
                 ),
-                launch_arguments={'verbose': 'true'}.items()
+                launch_arguments={'verbose': 'false'}.items()
             )]
         return []
 
